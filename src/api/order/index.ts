@@ -2,7 +2,7 @@ import http from '@/http'
 import {
   ICoupon,
   ICurrentOrderOrder,
-  IDriverInfo,
+  IDriverInfo, IDrivingLineVo,
   IOrderBillInfo,
   IOrderDetail,
   IOrderListItem,
@@ -145,4 +145,11 @@ export function getBestCoupon(orderId: number) {
  */
 export function receiveCoupon(couponId: number) {
   return http.get(`/coupon/receive/${couponId}`)
+}
+
+/**
+ * 计算最佳驾驶线路
+ */
+export function getCalculateDrivingLine(params: IQueryParams) {
+  return http.post<IDrivingLineVo>('/order/calculateDrivingLine', params)
 }
