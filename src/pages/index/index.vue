@@ -75,6 +75,24 @@ function setFromOrToLocation(type: 'from' | 'to') {
 onShow(async () => {
   // 隐藏tabbar
   uni.hideTabBar()
+  if (getToken()) {
+    // 判断已经存在订单，如果存在订单，则提示是否去往导航页
+    const { data } = await findCustomerCurrentOrder()
+    if (data.isHasCurrentOrder) {
+      uni.showModal({
+        title: '提示',
+        content: '您有未完成的订单，是否去往导航页？',
+        success: function (res) {
+          if (res.confirm) {
+            uni.navigateTo({
+              url: '/pages/creatOrder/creatOrder?orderId=' + data.orderId
+            })
+          }
+        }
+      })
+      return
+    }
+  }
   console.log('onShow-chooseLocation', chooseLocation)
   const location = chooseLocation.getLocation() // 如果点击确认选点按钮，则返回选点结果对象，否则返回null
   console.log('location', location)
@@ -115,25 +133,6 @@ onShow(async () => {
       uni.navigateTo({
         url: '/pages/creatOrder/creatOrder'
       })
-    }
-  } else {
-    if (getToken()) {
-      // 判断已经存在订单，如果存在订单，则提示是否去往导航页
-      const { data } = await findCustomerCurrentOrder()
-      if (data.isHasCurrentOrder) {
-        uni.showModal({
-          title: '提示',
-          content: '您有未完成的订单，是否去往导航页？',
-          success: function (res) {
-            if (res.confirm) {
-              uni.navigateTo({
-                url: '/pages/creatOrder/creatOrder?orderId=' + data.orderId
-              })
-            }
-          }
-        })
-        return
-      }
     }
   }
 })
