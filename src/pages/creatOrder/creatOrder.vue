@@ -2,19 +2,19 @@
   <tm-app>
     <!--    出发地到目的地地图-->
     <map
-      v-show="!showDriversPickUpPassengersRoutePlan"
-      :key="1"
-      id="map"
-      class="map"
-      :longitude="takeCarInfo.from.longitude"
-      :latitude="takeCarInfo.from.latitude"
-      :polyline="takeCarInfo.RouteInfo.polyline"
-      :markers="takeCarInfo.RouteInfo.markers"
-      scale="12"
-      :enable-traffic="false"
-      :show-location="true"
-      :enable-poi="true"
-      :enable-3D="true"
+        v-show="!showDriversPickUpPassengersRoutePlan"
+        :key="1"
+        id="map"
+        class="map"
+        :longitude="takeCarInfo.from.longitude"
+        :latitude="takeCarInfo.from.latitude"
+        :polyline="takeCarInfo.RouteInfo.polyline"
+        :markers="takeCarInfo.RouteInfo.markers"
+        scale="12"
+        :enable-traffic="false"
+        :show-location="true"
+        :enable-poi="true"
+        :enable-3D="true"
     >
       <cover-view @click="moveCurrentHandle()" class="location">
         <theme-icon custom-prefix="iconfont" type="iconfontditudingwei" size="30"></theme-icon>
@@ -22,19 +22,19 @@
     </map>
     <!--    司机到乘客路线地图-->
     <map
-      v-show="showDriversPickUpPassengersRoutePlan"
-      :key="2"
-      id="driveMap"
-      class="map"
-      :longitude="takeCarInfo.carInfo.from.longitude"
-      :latitude="takeCarInfo.carInfo.from.latitude"
-      :polyline="takeCarInfo.carInfo.RouteInfo.polyline"
-      :markers="takeCarInfo.carInfo.RouteInfo.markers"
-      scale="12"
-      :enable-traffic="false"
-      :show-location="true"
-      :enable-poi="true"
-      :enable-3D="true"
+        v-show="showDriversPickUpPassengersRoutePlan"
+        :key="2"
+        id="driveMap"
+        class="map"
+        :longitude="takeCarInfo.carInfo.from.longitude"
+        :latitude="takeCarInfo.carInfo.from.latitude"
+        :polyline="takeCarInfo.carInfo.RouteInfo.polyline"
+        :markers="takeCarInfo.carInfo.RouteInfo.markers"
+        scale="12"
+        :enable-traffic="false"
+        :show-location="true"
+        :enable-poi="true"
+        :enable-3D="true"
     >
       <cover-view @click="moveCurrentHandle()" class="location">
         <theme-icon custom-prefix="iconfont" type="iconfontditudingwei" size="30"></theme-icon>
@@ -69,7 +69,44 @@
             <uni-icons custom-prefix="iconfont" type="iconfontdianhua" size="30"></uni-icons>
           </view>
         </view>
-        <loading-button :block="true" disabled :click-fun="cancelOrderHandle" :margin="[10]" :shadow="0" size="large" label="取消订单"></loading-button>
+        <!--       距离时间 -->
+        <view v-if="takeCarInfo?.orderInfo.orderStatus < OrderStatus.START_SERVICE">
+          <tm-cell :margin="[0, 0]" :titleFontSize="30">
+            <template #title>
+              <view class="flex flex-row flex-row-center-start">
+                <view style="height: 20rpx; width: 20rpx; background-color: #93da5f; border-radius: 50%"></view>
+                <text class="ml-20 text-overflow-3" style="width: 300rpx">距离：{{ takeCarInfo.carInfo.RouteInfo.distance }}公里</text>
+                <text class="ml-20 text-overflow-3" style="width: 300rpx">时间：{{ takeCarInfo.carInfo.RouteInfo.duration }}分钟</text>
+              </view>
+            </template>
+            <template #right>
+              <view></view>
+            </template>
+          </tm-cell>
+        </view>
+        <view v-else>
+          <tm-cell :margin="[0, 0]" :titleFontSize="30">
+            <template #title>
+              <view class="flex flex-row flex-row-center-start">
+                <view style="height: 20rpx; width: 20rpx; background-color: #93da5f; border-radius: 50%"></view>
+                <text class="ml-20 text-overflow-3" style="width: 300rpx">距离：{{ takeCarInfo.RouteInfo.distance }}公里</text>
+                <text class="ml-20 text-overflow-3" style="width: 300rpx">时间：{{ takeCarInfo.RouteInfo.duration }}分钟</text>
+              </view>
+            </template>
+            <template #right>
+              <view></view>
+            </template>
+          </tm-cell>
+        </view>
+        <loading-button
+            :block="true"
+            disabled
+            :click-fun="cancelOrderHandle"
+            :margin="[10]"
+            :shadow="0"
+            size="large"
+            label="取消订单"
+        ></loading-button>
       </tm-sheet>
     </view>
     <tm-drawer :width="300" :height="700" :hideHeader="true" :overlayClick="false" ref="popRef" placement="bottom">
@@ -282,6 +319,13 @@ async function getOrderInfoHandleByOrderId(orderId: number | string) {
   else if (res.data.status < OrderStatus.START_SERVICE) {
     showDriversPickUpPassengersRoutePlan.value = true
     isHaveReceiveOrders.value = true
+    closePopupHandle()
+    //   请求司机信息
+    await takeCarInfo.getDriverInfoHandle()
+    //   司机实时位置
+    await takeCarInfo.queryCarLocationToStartPosition(() => {
+      console.log('getCarLocationHandle:', takeCarInfo.carInfo.RouteInfo.markers)
+    })
   } else {
     showDriversPickUpPassengersRoutePlan.value = false
     isHaveReceiveOrders.value = true
@@ -304,14 +348,11 @@ async function reloadPageHandleByOrderId(orderId: number | string) {
   await getOrderInfoHandleByOrderId(orderId)
 }
 
-onLoad((options: any) => {
+onLoad(async (options: any) => {
   console.log('options', options)
   if (options?.orderId) {
-    reloadPageHandleByOrderId(options?.orderId)
-  } else {
-    //   获取当前位置信息
-    takeCarInfo.routePlan() //   获取当前位置信息
-    takeCarInfo.routePlan()
+    await reloadPageHandleByOrderId(options?.orderId)
+    await takeCarInfo.routePlan() //   获取当前位置信息
   }
 })
 onUnload(() => {
