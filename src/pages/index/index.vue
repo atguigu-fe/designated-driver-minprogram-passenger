@@ -10,11 +10,24 @@
       :enable-poi="true"
       class="map"
     >
-      <cover-view @click="moveToLocationHandle()" class="location">
+      <!-- <cover-view @click="moveToLocationHandle()" class="location">
         <theme-icon custom-prefix="iconfont" type="iconfontditudingwei" size="30"></theme-icon>
+      </cover-view> -->
+
+      <cover-view class="location-panel">
+        <cover-view class="location-panel-container">
+          <cover-view class="from els" @click="setFromOrToLocation('from')">
+            <cover-view>
+              {{ takeCarInfo.from.address || '请选择出发地' }}
+            </cover-view>
+          </cover-view>
+          <cover-view class="to els" @click="setFromOrToLocation('to')">
+            <cover-view>{{ takeCarInfo.to.address || '请选择目的地' }}</cover-view>
+          </cover-view>
+        </cover-view>
       </cover-view>
     </map>
-    <view class="location-panel">
+    <!-- <view class="location-panel">
       <tm-sheet :round="3" :shadow="2">
         <view class="from" @tap="setFromOrToLocation('from')">
           <tm-input disabled v-model="takeCarInfo.from.address" :followTheme="false" placeholder="请选择出发地" :margin="[0, 24]"></tm-input>
@@ -23,7 +36,7 @@
           <tm-input disabled v-model="takeCarInfo.to.address" :followTheme="false" placeholder="请选择目的地" :margin="[0, 24]"></tm-input>
         </view>
       </tm-sheet>
-    </view>
+    </view> -->
     <tabbar-nav>111</tabbar-nav>
   </tm-app>
 </template>
@@ -34,7 +47,7 @@ import { IMapProps } from '@/api/index/types'
 import { useTakeCarInfoStore } from '@/store/modules/takeCarInfo'
 import { QqMapkey } from '@/config/config'
 import { findCustomerCurrentOrder } from '@/api/order'
-import {getToken} from '@/utils/storage';
+import { getToken } from '@/utils/storage'
 //#region <map相关>
 const map = uni.createMapContext('map')
 // 选择地点插件
@@ -168,8 +181,38 @@ onUnload(() => {
 }
 .location-panel {
   position: absolute;
-  //background: pink;
   width: 100%;
-  bottom: 100rpx;
+  bottom: 160rpx;
+  display: flex;
+  justify-content: center;
+}
+
+.location-panel-container {
+  width: 560rpx;
+  background-color: #fff;
+  padding: 30rpx 20rpx;
+  border-radius: 10rpx;
+}
+
+.from {
+  margin-bottom: 30rpx;
+}
+
+.from,
+.to {
+  width: 520rpx;
+  height: 40rpx;
+  background-color: #f5f5f5;
+  color: #808080;
+  padding: 10rpx 20rpx;
+  font-size: 28rpx;
+  line-height: 40rpx;
+  border-radius: 10rpx;
+}
+
+.els {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 }
 </style>
